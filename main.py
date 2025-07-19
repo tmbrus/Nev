@@ -1,57 +1,30 @@
-class BooksCollector:
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support import expected_conditions
+from selenium.webdriver.support.wait import WebDriverWait
 
-    def __init__(self):
-        self.books_genre = {}
-        self.favorites = []
-        self.genre = ['Фантастика', 'Ужасы', 'Детективы', 'Мультфильмы', 'Комедии']
-        self.genre_age_rating = ['Ужасы', 'Детективы']
+driver = webdriver.Chrome()
+driver.get("https://qa-mesto.praktikum-services.ru/")
 
-    # добавляем новую книгу
-    def add_new_book(self, name):
-        if not self.books_genre.get(name) and 0 < len(name) < 41:
-            self.books_genre[name] = ''
+# Найди поле "Email" и заполни его
+driver.find_element(By.ID, 'email').send_keys('kurohtin_26@gmail.com')
 
-    # устанавливаем книге жанр
-    def set_book_genre(self, name, genre):
-        if name in self.books_genre and genre in self.genre:
-            self.books_genre[name] = genre
+# Найди поле "Пароль" и заполни его
+driver.find_element(By.ID, 'password').send_keys('AaZ-cYD-Kt2-H3d')
 
-    # получаем жанр книги по её имени
-    def get_book_genre(self, name):
-        return self.books_genre.get(name)
+# Найди кнопку "Войти" и кликни по ней
+driver.find_element(By.CLASS_NAME, 'auth-form__button').click()
 
-    # выводим список книг с определённым жанром
-    def get_books_with_specific_genre(self, genre):
-        books_with_specific_genre = []
-        if self.books_genre and genre in self.genre:
-            for name, book_genre in self.books_genre.items():
-                if book_genre == genre:
-                    books_with_specific_genre.append(name)
-        return books_with_specific_genre
+# Добавь явное ожидание для загрузки страницы
+WebDriverWait(driver, 10).until(expected_conditions.visibility_of_element_located((By.CLASS_NAME, 'card__image')))
 
-    # получаем словарь books_genre
-    def get_books_genre(self):
-        return self.books_genre
+# Найди футер
+element = driver.find_element(By.TAG_NAME, "footer")
 
-    # возвращаем книги, подходящие детям
-    def get_books_for_children(self):
-        books_for_children = []
-        for name, genre in self.books_genre.items():
-            if genre not in self.genre_age_rating and genre in self.genre:
-                books_for_children.append(name)
-        return books_for_children
+# Прокрути страницу до футера
+driver.execute_script("arguments[0].scrollIntoView();", element)
 
-    # добавляем книгу в Избранное
-    def add_book_in_favorites(self, name):
-        if name in self.books_genre:
-            if name not in self.favorites:
-                self.favorites.append(name)
+# Проверь, что футер содержит текст 'Mesto Russia'
+assert 'Mesto Russia' in element.text
 
-    # удаляем книгу из Избранного
-    def delete_book_from_favorites(self, name):
-        if name in self.favorites:
-            self.favorites.remove(name)
-
-    # получаем список Избранных книг
-    def get_list_of_favorites_books(self):
-        return self.favorites
+driver.quit()
